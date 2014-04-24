@@ -1,0 +1,68 @@
+#!/bin/sh
+#
+# File: /etc/init.d/cgminer
+#
+# @author Kevin Pan <panzhibiao@bitfund.pe>
+# @copyright Hashratio.com
+# @since 2014-04-24
+#
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
+DESC="Cgminer Manager"
+NAME=cgminer
+DAEMON=/usr/local/bin/$NAME
+PIDFILE=/var/run/cgminer.pid
+SCRIPTNAME=/etc/init.d/$NAME
+VERBOSE=yes
+
+# Exit if the package is not installed
+[ -x "$DAEMON" ] || exit 0
+
+# Load the VERBOSE setting and other rcS variables
+. /lib/init/vars.sh
+
+# Define LSB log_* functions.
+# Depend on lsb-base (>= 3.0-6) to ensure that this file is present.
+. /lib/lsb/init-functions
+
+
+#
+# Function that starts the daemon/service
+#
+do_start() {
+    DEVS=`find /dev/ -type c -name "ttyUSB*"  | sed 's/^/-S/' |  sed ':a;N;$!ba;s/\n/ /g'`
+    DAEMON_ARGS=" ${DEVS} --config /etc/cgminer.conf --real-quiet "
+    start-stop-daemon -S -x $DAEMON -p $PIDFILE -m -b -- $DAEMON_ARGS
+}
+
+
+#
+# Function that stops the daemon/service
+#
+do_stop()
+{
+    start-stop-daemon -K -n $NAME -p $PIDFILE -s TERM
+    #killall -9 $NAME
+}
+
+
+
+case "$1" in
+    start)
+        [ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC" "$NAME"
+        do_start
+        ;;
+    stop)
+        [ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
+        do_stop
+        ;;
+    status)
+        status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
+        ;;
+    *)
+        echo "Usage: $SCRIPTNAME {start|stop|status}" >&2
+        exit 1
+    ;;
+esac
+
+:
