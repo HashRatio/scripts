@@ -2,7 +2,9 @@
 # 
 # crontab check script
 # @since 2014-04
-# 
+#
+# crontab: */2 * * * * sh -x /usr/local/bin/cgminer-monitor >> /tmp/cgminer-monitor.log 2>&1 
+#
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
 
